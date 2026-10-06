@@ -491,10 +491,90 @@ const negocios = [
     }
 
 async function cargarPatrocinio() {
-    mostrarImagen(
-        "./assets/allgamex/imagen1.jpg?v=5",
-        "AllGameX"
-    );
+    const respaldo =
+        "./assets/allgamex/imagen1.jpg";
+
+    try {
+        if (patron.length === 0) {
+            throw new Error("No hay campañas configuradas.");
+        }
+
+        const respuesta =
+            await fetch(BACKEND_URL + "/next-ad");
+
+        if (!respuesta.ok) {
+            throw new Error("No se obtuvo el turno publicitario.");
+        }
+
+        const datos =
+            await respuesta.json();
+
+        const turno =
+            Number(datos.slot);
+
+        if (!Number.isInteger(turno) || turno < 0) {
+            throw new Error("Turno inválido.");
+        }
+
+        const posicion =
+            turno % patron.length;
+
+        const ciclo =
+            Math.floor(turno / patron.length);
+
+        const nivel =
+            patron[posicion];
+
+        const lista =
+            grupos[nivel];
+
+        const repeticionesNivel =
+            patron.filter(x => x === nivel).length;
+
+        const ocurrenciasAntes =
+            ciclo * repeticionesNivel +
+            patron
+                .slice(0, posicion)
+                .filter(x => x === nivel)
+                .length;
+
+        const negocioIndex =
+            ocurrenciasAntes % lista.length;
+
+        const impresionesNegocio =
+            Math.floor(
+                ocurrenciasAntes / lista.length
+            );
+
+        const negocio =
+            lista[negocioIndex];
+
+        const imagenIndex =
+            impresionesNegocio %
+            negocio.imagenes.length;
+
+        mostrarImagen(
+            negocio.imagenes[imagenIndex],
+            negocio.nombre
+        );
+
+        console.log("Imagen asignada:", {
+            turno,
+            nivel,
+            imagen: imagenIndex + 1
+        });
+
+    } catch (error) {
+        console.error(
+            "Error al cargar patrocinio:",
+            error
+        );
+
+        mostrarImagen(
+            respaldo,
+            "AllGameX"
+        );
+    }
 }
 
 cargarPatrocinio();
