@@ -10,7 +10,7 @@
 
     <meta name="theme-color" content="#007aff">
 
-    <title>WiFree Wi-Fi Gratis</title>
+    <title>Wi-Fi Gratis All Gamex</title>
 
     <style>
         * {
@@ -46,7 +46,7 @@
   padding: 14px;
 }
 
-.sponsor-frame {
+.ad-container {
   width: 100%;
   height: 60vh;
   min-height: 300px;
@@ -55,12 +55,14 @@
   border-radius: 14px;
 }
 
-.sponsor-image {
-    width: auto;
-    height: auto;
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
+.ad-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: cover;
+  object-position: center;
 }
 
         h2 {
@@ -89,7 +91,7 @@
             text-align: center;
         }
 
-        .sponsor-frame {
+        .ad-container {
             width: 100%;
 
             height: 60vh;
@@ -108,7 +110,7 @@
             background: #eeeeee;
         }
 
-      .sponsor-image {
+      .ad-img {
     display: block;
 
     width: 100%;
@@ -117,13 +119,13 @@
     max-width: none;
     max-height: none;
 
-    object-fit: contain;
+    object-fit: cover;
     object-position: center;
 
     border-radius: 10px;
 }
 
-        .media-message {
+        .ad-error {
             display: none;
 
             padding: 20px;
@@ -221,13 +223,13 @@
         margin-bottom: 8px;
     }
 
-    .sponsor-frame {
+    .ad-container {
     height: 50vh;
     max-height: none;
     margin-bottom: 9px;
 }
 
-    .sponsor-image {
+    .ad-img {
     height: 100%;
     max-height: none;
 }
@@ -236,35 +238,6 @@
         min-height: 45px;
         padding: 11px;
     }
-}
-        /* Ajuste final para mostrar el anuncio completo */
-.sponsor-frame {
-    width: 100%;
-    max-width: 430px;
-    height: min(60vh, 640px);
-
-    margin: 0 auto 15px;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    overflow: hidden;
-    border-radius: 10px;
-    background: #eeeeee;
-}
-
-.sponsor-image {
-    display: block;
-
-    width: auto !important;
-    height: auto !important;
-
-    max-width: 100%;
-    max-height: 100%;
-
-    object-fit: contain !important;
-    object-position: center;
 }
     </style>
 </head>
@@ -275,27 +248,27 @@
 
     <div class="box">
 
-        <h2>wifree Wi-Fi Gratis</h2>
+        <h2>PRUEBA NUEVA 123</h2>
 
         <p class="mensaje">
             Disfruta de Internet gratis.
-            Espera la cuenta regresiva.
+            Observa el anuncio y espera la cuenta regresiva.
         </p>
 
-<div class="sponsor-frame">
+        <div class="ad-container">
 
-    <img
-        id="sponsorImage"
-        class="sponsor-image"
-        src="./assets/allgamex/imagen1.jpg"
-        alt="Contenido patrocinado"
-    >
+            <img
+                id="publicidad"
+                class="ad-img"
+                src=""
+                alt="Publicidad All Gamex"
+            >
 
-    <div id="mediaMessage" class="media-message">
-        No se pudo cargar la imagen.
-    </div>
+            <div id="adError" class="ad-error">
+                No se pudo cargar el anuncio.
+            </div>
 
-</div>
+        </div>
 
         <button
             id="accionBtn"
@@ -307,7 +280,7 @@
         </button>
 
         <div id="contador" class="contador">
-            Preparando imagen...
+            Preparando anuncio...
         </div>
 
         <div id="estado" class="estado"></div>
@@ -349,45 +322,21 @@
     Esta página muestra una sola imagen por visita.
     */
 
-    const BASE_ASSETS =
-    "./assets";
-
-function imagenesNegocio(carpeta, prefijo, cantidad, extension = "jpg") {
-    return Array.from({ length: cantidad }, (_, indice) => {
-        const numero = indice + 1;
-
-        return `${BASE_ASSETS}/${carpeta}/${prefijo}${numero}.${extension}`;
-    });
-}
-
-const imagenesAllGameX = [
-    "./assets/allgamex/imagen1.jpg",
-    "./assets/allgamex/imagen2.jpg",
-    "./assets/allgamex/imagen3.jpg"
-];
-
-const negocios = [
-    {
-        id: "allgamex-normal",
-        nombre: "AllGameX",
-        nivel: "normal",
-        imagenes: imagenesAllGameX
-    },
-    {
-        id: "allgamex-alta",
-        nombre: "AllGameX",
-        nivel: "alta",
-        imagenes: imagenesAllGameX
-    },
-    {
-        id: "allgamex-baja",
-        nombre: "AllGameX",
-        nivel: "baja",
-        imagenes: imagenesAllGameX
-    }
-];
+    const negocios = [
+        {
+            id: "allgamex",
+            nombre: "AllGameX",
+            nivel: "normal",
+            imagenes: [
+                "https://neyo1982.github.io/publicidad/assets/agxpub.jpg",
+                "https://neyo1982.github.io/publicidad/assets/agxpub2.jpg",
+                "https://neyo1982.github.io/publicidad/assets/agxpub3.jpg"
+                // Agrega aquí agxpub4.jpg y agxpub5.jpg cuando existan.
+            ]
+        }
 
         // Agrega más negocios con nivel "alta", "normal" o "baja".
+    ];
 /*
     ============================================================
     OBTENER PARÁMETROS DE OMADA
@@ -437,10 +386,10 @@ const negocios = [
     */
 
     const imagen =
-        document.getElementById("sponsorImage");
+        document.getElementById("publicidad");
 
-    const mediaMessage=
-        document.getElementById("mediaMessage");
+    const adError =
+        document.getElementById("adError");
 
     const boton =
         document.getElementById("accionBtn");
@@ -477,7 +426,7 @@ const negocios = [
 
     /*
     ============================================================
-    SELECCIÓN DE PATROCINIOS
+    SELECCIÓN DE PUBLICIDAD
     ============================================================
 
     El Worker entrega un turno global. La proporción es:
@@ -486,8 +435,6 @@ const negocios = [
     Cada visita recibe una sola imagen; no existe carrusel.
     */
 
-
-        // Continúa aquí el código actual de selección
     const patronBase = [
         "alta", "normal", "alta", "baja", "alta", "normal", "alta"
     ];
@@ -504,107 +451,73 @@ const negocios = [
     function mostrarImagen(url, nombre) {
         imagen.onload = function () {
             imagen.style.display = "block";
-            mediaMessage.style.display = "none";
-            contador.textContent = "Imagen de " + nombre;
+            adError.style.display = "none";
+            contador.textContent = "Publicidad de " + nombre;
         };
 
         imagen.onerror = function () {
             imagen.style.display = "none";
-            mediaMessage.style.display = "block";
-            contador.textContent = "No se pudo cargar la imagen.";
+            adError.style.display = "block";
+            contador.textContent = "No se pudo cargar la publicidad.";
         };
 
         imagen.src = url;
     }
 
-async function cargarPatrocinio() {
-    const respaldo =
-        "./assets/allgamex/imagen1.jpg";
+    async function cargarPublicidad() {
+        try {
+            if (patron.length === 0) {
+                throw new Error("No hay campañas publicitarias configuradas.");
+            }
 
-    try {
-        if (patron.length === 0) {
-            throw new Error("No hay campañas configuradas.");
-        }
+            const respuesta = await fetch(BACKEND_URL + "/next-ad");
+            if (!respuesta.ok) throw new Error("No se obtuvo el turno publicitario.");
 
-        const respuesta =
-            await fetch(BACKEND_URL + "/next-ad");
+            const datos = await respuesta.json();
+            const turno = Number(datos.slot);
+            if (!Number.isInteger(turno) || turno < 0) {
+                throw new Error("Turno publicitario inválido.");
+            }
 
-        if (!respuesta.ok) {
-            throw new Error("No se obtuvo el turno publicitario.");
-        }
+            const posicion = turno % patron.length;
+            const ciclo = Math.floor(turno / patron.length);
+            const nivel = patron[posicion];
+            const lista = grupos[nivel];
+            const repeticionesNivel = patron.filter(x => x === nivel).length;
 
-        const datos =
-            await respuesta.json();
+            const ocurrenciasAntes =
+                ciclo * repeticionesNivel +
+                patron.slice(0, posicion).filter(x => x === nivel).length;
 
-        const turno =
-            Number(datos.slot);
+            const negocioIndex = ocurrenciasAntes % lista.length;
+            const impresionesNegocio = Math.floor(ocurrenciasAntes / lista.length);
+            const negocio = lista[negocioIndex];
+            const imagenIndex = impresionesNegocio % negocio.imagenes.length;
 
-        if (!Number.isInteger(turno) || turno < 0) {
-            throw new Error("Turno inválido.");
-        }
-
-        const posicion =
-            turno % patron.length;
-
-        const ciclo =
-            Math.floor(turno / patron.length);
-
-        const nivel =
-            patron[posicion];
-
-        const lista =
-            grupos[nivel];
-
-        const repeticionesNivel =
-            patron.filter(x => x === nivel).length;
-
-        const ocurrenciasAntes =
-            ciclo * repeticionesNivel +
-            patron
-                .slice(0, posicion)
-                .filter(x => x === nivel)
-                .length;
-
-        const negocioIndex =
-            ocurrenciasAntes % lista.length;
-
-        const impresionesNegocio =
-            Math.floor(
-                ocurrenciasAntes / lista.length
+            mostrarImagen(
+                negocio.imagenes[imagenIndex],
+                negocio.nombre
             );
 
-        const negocio =
-            lista[negocioIndex];
+            console.log("Publicidad asignada:", {
+                turno,
+                nivel,
+                negocio: negocio.id,
+                imagen: imagenIndex + 1
+            });
 
-        const imagenIndex =
-            impresionesNegocio %
-            negocio.imagenes.length;
+        } catch (error) {
+            console.error("Error al cargar publicidad:", error);
 
-        mostrarImagen(
-            negocio.imagenes[imagenIndex],
-            negocio.nombre
-        );
-
-        console.log("Imagen asignada:", {
-            turno,
-            nivel,
-            imagen: imagenIndex + 1
-        });
-
-    } catch (error) {
-        console.error(
-            "Error al cargar patrocinio:",
-            error
-        );
-
-        mostrarImagen(
-            respaldo,
-            "AllGameX"
-        );
+            // Respaldo para que el portal siga funcionando si el endpoint está temporalmente inactivo.
+            mostrarImagen(
+                "https://neyo1982.github.io/publicidad/assets/agxpub.jpg",
+                "AllGameX"
+            );
+        }
     }
-}
 
-cargarPatrocinio();
+    cargarPublicidad();
 
 /*
     ============================================================
@@ -667,7 +580,7 @@ cargarPatrocinio();
 
         /*
         ========================================================
-        FINALIZÓ EL PATROCINIO
+        FINALIZÓ LA PUBLICIDAD
         ========================================================
         */
 
@@ -679,7 +592,7 @@ cargarPatrocinio();
             "Conectarse a Internet Gratis";
 
         contador.textContent =
-            "Patrocinio completada.";
+            "Publicidad completada.";
 
     }
 
@@ -856,14 +769,19 @@ cargarPatrocinio();
             */
 
             const destino =
-                 "https://www.google.com/";
+                resultado.redirectUrl ||
+                redirectUrl;
+
 
             setTimeout(
-               function () {
-                  window.location.replace(destino);
-               },
-               300
-             );
+                function () {
+
+                    window.location.href =
+                        destino;
+
+                },
+                300
+            );
 
 
         } catch (error) {
