@@ -10,7 +10,7 @@
 
     <meta name="theme-color" content="#007aff">
 
-    <title>Wi-Fi Gratis All Gamex</title>
+    <title>WiFree Wi-Fi Gratis</title>
 
     <style>
         * {
@@ -46,7 +46,7 @@
   padding: 14px;
 }
 
-.ad-container {
+.content-frame {
   width: 100%;
   height: 60vh;
   min-height: 300px;
@@ -55,7 +55,7 @@
   border-radius: 14px;
 }
 
-.ad-img {
+.content-image {
   display: block;
   width: 100%;
   height: 100%;
@@ -91,7 +91,7 @@
             text-align: center;
         }
 
-        .ad-container {
+        .content-frame {
             width: 100%;
 
             height: 60vh;
@@ -110,7 +110,7 @@
             background: #eeeeee;
         }
 
-      .ad-img {
+      .content-image {
     display: block;
 
     width: 100%;
@@ -125,7 +125,7 @@
     border-radius: 10px;
 }
 
-        .ad-error {
+        .content-message {
             display: none;
 
             padding: 20px;
@@ -223,13 +223,13 @@
         margin-bottom: 8px;
     }
 
-    .ad-container {
+    .content-frame {
     height: 50vh;
     max-height: none;
     margin-bottom: 9px;
 }
 
-    .ad-img {
+    .content-image {
     height: 100%;
     max-height: none;
 }
@@ -248,27 +248,27 @@
 
     <div class="box">
 
-        <h2>PRUEBA NUEVA 123</h2>
+        <h2>wifree Wi-Fi Gratis</h2>
 
         <p class="mensaje">
             Disfruta de Internet gratis.
-            Observa el anuncio y espera la cuenta regresiva.
+            Espera la cuenta regresiva.
         </p>
 
-        <div class="ad-container">
+<div class="content-frame">
 
-            <img
-                id="publicidad"
-                class="ad-img"
-                src=""
-                alt="Publicidad All Gamex"
-            >
+    <img
+        id="contentImage"
+        class="content-image"
+        src="./assets/allgamex/imagen1.jpg"
+        alt="Contenido"
+    >
 
-            <div id="adError" class="ad-error">
-                No se pudo cargar el anuncio.
-            </div>
+    <div id="contentMessage" class="content-message">
+        No se pudo cargar la imagen.
+    </div>
 
-        </div>
+</div>
 
         <button
             id="accionBtn"
@@ -280,7 +280,7 @@
         </button>
 
         <div id="contador" class="contador">
-            Preparando anuncio...
+            Preparando imagen...
         </div>
 
         <div id="estado" class="estado"></div>
@@ -314,29 +314,53 @@
 
     /*
     ============================================================
-    CAMPAÑAS PUBLICITARIAS
+    CONFIGURACIÓN DE CONTENIDO
     ============================================================
 
-    Cada negocio puede tener distinta cantidad de imágenes.
+    Cada cliente puede tener distinta cantidad de imágenes.
     La selección del turno la entrega el Worker mediante /next-ad.
     Esta página muestra una sola imagen por visita.
     */
 
-    const negocios = [
-        {
-            id: "allgamex",
-            nombre: "AllGameX",
-            nivel: "normal",
-            imagenes: [
-                "https://neyo1982.github.io/publicidad/assets/agxpub.jpg",
-                "https://neyo1982.github.io/publicidad/assets/agxpub2.jpg",
-                "https://neyo1982.github.io/publicidad/assets/agxpub3.jpg"
-                // Agrega aquí agxpub4.jpg y agxpub5.jpg cuando existan.
-            ]
-        }
+    const BASE_ASSETS =
+    "./assets";
+
+function imagenesNegocio(carpeta, prefijo, cantidad, extension = "jpg") {
+    return Array.from({ length: cantidad }, (_, indice) => {
+        const numero = indice + 1;
+
+        return `${BASE_ASSETS}/${carpeta}/${prefijo}${numero}.${extension}`;
+    });
+}
+
+const imagenesAllGameX = [
+    "./assets/allgamex/imagen1.jpg",
+    "./assets/allgamex/imagen2.jpg",
+    "./assets/allgamex/imagen3.jpg"
+];
+
+const negocios = [
+    {
+        id: "allgamex-normal",
+        nombre: "AllGameX",
+        nivel: "normal",
+        imagenes: imagenesAllGameX
+    },
+    {
+        id: "allgamex-alta",
+        nombre: "AllGameX",
+        nivel: "alta",
+        imagenes: imagenesAllGameX
+    },
+    {
+        id: "allgamex-baja",
+        nombre: "AllGameX",
+        nivel: "baja",
+        imagenes: imagenesAllGameX
+    }
+];
 
         // Agrega más negocios con nivel "alta", "normal" o "baja".
-    ];
 /*
     ============================================================
     OBTENER PARÁMETROS DE OMADA
@@ -378,6 +402,11 @@
         parametros.get("redirectUrl") ||
         "https://www.google.com";
 
+    const sessionId =
+        (window.crypto && crypto.randomUUID)
+            ? crypto.randomUUID()
+            : String(Date.now()) + Math.random().toString(16).slice(2);
+
 
     /*
     ============================================================
@@ -386,10 +415,10 @@
     */
 
     const imagen =
-        document.getElementById("publicidad");
+        document.getElementById("contentImage");
 
-    const adError =
-        document.getElementById("adError");
+    const contentMessage=
+        document.getElementById("contentMessage");
 
     const boton =
         document.getElementById("accionBtn");
@@ -426,7 +455,7 @@
 
     /*
     ============================================================
-    SELECCIÓN DE PUBLICIDAD
+    SELECCIÓN DE CONTENIDO
     ============================================================
 
     El Worker entrega un turno global. La proporción es:
@@ -435,6 +464,8 @@
     Cada visita recibe una sola imagen; no existe carrusel.
     */
 
+
+        // Continúa aquí el código actual de selección
     const patronBase = [
         "alta", "normal", "alta", "baja", "alta", "normal", "alta"
     ];
@@ -448,76 +479,73 @@
     // Si todavía no hay negocios de algún nivel, se omiten sus turnos.
     const patron = patronBase.filter(nivel => grupos[nivel].length > 0);
 
+    let contenidoActual = null;
+    let contenidoCompletado = false;
+    let contenidoCargado = false;
+
+    function registrarActividad(eventType) {
+        if (!contenidoActual) return;
+
+        fetch(BACKEND_URL + "/event", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            keepalive: true,
+            body: JSON.stringify({
+                eventType,
+                campaignId: contenidoActual.campaignId,
+                imageIndex: contenidoActual.imageIndex,
+                siteId: contenidoActual.siteId,
+                apMac,
+                sessionId
+            })
+        }).catch(error => console.warn("No se pudo registrar evento:", error));
+    }
+
     function mostrarImagen(url, nombre) {
         imagen.onload = function () {
+            contenidoCargado = true;
             imagen.style.display = "block";
-            adError.style.display = "none";
-            contador.textContent = "Publicidad de " + nombre;
+            contentMessage.style.display = "none";
+            contador.textContent = "Imagen de " + nombre;
+            registrarActividad("image_loaded");
         };
 
         imagen.onerror = function () {
             imagen.style.display = "none";
-            adError.style.display = "block";
-            contador.textContent = "No se pudo cargar la publicidad.";
+            contentMessage.style.display = "block";
+            contador.textContent = "No se pudo cargar la imagen.";
         };
 
         imagen.src = url;
     }
 
-    async function cargarPublicidad() {
+    async function cargarContenido() {
         try {
-            if (patron.length === 0) {
-                throw new Error("No hay campañas publicitarias configuradas.");
-            }
-
-            const respuesta = await fetch(BACKEND_URL + "/next-ad");
-            if (!respuesta.ok) throw new Error("No se obtuvo el turno publicitario.");
+            const consulta = new URLSearchParams({ apMac, sessionId });
+            const respuesta = await fetch(
+                BACKEND_URL + "/next-ad?" + consulta.toString()
+            );
+            if (!respuesta.ok) throw new Error("No se obtuvo la campaña.");
 
             const datos = await respuesta.json();
-            const turno = Number(datos.slot);
-            if (!Number.isInteger(turno) || turno < 0) {
-                throw new Error("Turno publicitario inválido.");
+            if (!datos.success || !datos.imageUrl) {
+                throw new Error(datos.error || "No hay contenido activo.");
             }
 
-            const posicion = turno % patron.length;
-            const ciclo = Math.floor(turno / patron.length);
-            const nivel = patron[posicion];
-            const lista = grupos[nivel];
-            const repeticionesNivel = patron.filter(x => x === nivel).length;
+            contenidoActual = datos;
+            mostrarImagen(datos.imageUrl, datos.advertiser || "Anunciante");
 
-            const ocurrenciasAntes =
-                ciclo * repeticionesNivel +
-                patron.slice(0, posicion).filter(x => x === nivel).length;
-
-            const negocioIndex = ocurrenciasAntes % lista.length;
-            const impresionesNegocio = Math.floor(ocurrenciasAntes / lista.length);
-            const negocio = lista[negocioIndex];
-            const imagenIndex = impresionesNegocio % negocio.imagenes.length;
-
-            mostrarImagen(
-                negocio.imagenes[imagenIndex],
-                negocio.nombre
-            );
-
-            console.log("Publicidad asignada:", {
-                turno,
-                nivel,
-                negocio: negocio.id,
-                imagen: imagenIndex + 1
-            });
-
+            console.log("Contenido asignado:", datos);
         } catch (error) {
-            console.error("Error al cargar publicidad:", error);
-
-            // Respaldo para que el portal siga funcionando si el endpoint está temporalmente inactivo.
+            console.error("Error al cargar contenido:", error);
             mostrarImagen(
-                "https://neyo1982.github.io/publicidad/assets/agxpub.jpg",
+                "./assets/allgamex/imagen1.jpg",
                 "AllGameX"
             );
         }
     }
 
-    cargarPublicidad();
+    cargarContenido();
 
 /*
     ============================================================
@@ -532,14 +560,14 @@
     ============================================================
     */
 
-    const DURACION_ANUNCIO =
+    const DURACION_CONTENIDO =
         15 * 1000;
 
     const horaInicio =
         Date.now();
 
     const horaFin =
-        horaInicio + DURACION_ANUNCIO;
+        horaInicio + DURACION_CONTENIDO;
 
 
     function actualizarContador() {
@@ -580,7 +608,7 @@
 
         /*
         ========================================================
-        FINALIZÓ LA PUBLICIDAD
+        FINALIZÓ EL CONTENIDO
         ========================================================
         */
 
@@ -592,7 +620,12 @@
             "Conectarse a Internet Gratis";
 
         contador.textContent =
-            "Publicidad completada.";
+            "Contenido completado.";
+
+        if (contenidoCargado && !contenidoCompletado) {
+            contenidoCompletado = true;
+            registrarActividad("ad_completed");
+        }
 
     }
 
@@ -721,7 +754,11 @@
                               site: site,
                               ssidName: ssidName,
                               radioId: radioId,
-                              redirectUrl: redirectUrl
+                              redirectUrl: redirectUrl,
+                              sessionId: sessionId,
+                              campaignId: contenidoActual?.campaignId || "",
+                              imageIndex: contenidoActual?.imageIndex || "",
+                              siteId: contenidoActual?.siteId || ""
                         })
                     }
                 );
@@ -769,19 +806,14 @@
             */
 
             const destino =
-                resultado.redirectUrl ||
-                redirectUrl;
-
+                 "https://www.google.com/";
 
             setTimeout(
-                function () {
-
-                    window.location.href =
-                        destino;
-
-                },
-                300
-            );
+               function () {
+                  window.location.replace(destino);
+               },
+               300
+             );
 
 
         } catch (error) {
