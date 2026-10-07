@@ -11,10 +11,11 @@
     h1 { margin: 0 0 6px; font-size: 1.7rem; }
     .muted { color: #68737d; }
     .panel { background: #fff; border: 1px solid #dfe5ea; border-radius: 12px; padding: 16px; margin-top: 16px; box-shadow: 0 2px 8px #17202a0d; }
-    .controls { display: grid; grid-template-columns: 1fr 180px auto; gap: 10px; align-items: end; }
+    .controls { display: grid; grid-template-columns: 1fr 180px auto auto; gap: 10px; align-items: end; }
     label { display: grid; gap: 5px; font-size: .88rem; font-weight: 600; }
     input, select, button { min-height: 40px; box-sizing: border-box; border: 1px solid #c7d0d8; border-radius: 8px; padding: 8px 10px; font: inherit; }
     button { cursor: pointer; background: #b9152b; color: #fff; border-color: #b9152b; font-weight: 700; }
+    button.secondary { background: #fff; color: #b9152b; }
     button:disabled { opacity: .6; cursor: wait; }
     .status { margin-top: 10px; min-height: 1.3em; }
     .error { color: #a51228; }
@@ -50,6 +51,7 @@
           </select>
         </label>
         <button id="load" type="button">Consultar</button>
+        <button id="export" class="secondary" type="button" disabled>Exportar CSV</button>
       </div>
       <div id="status" class="status muted"></div>
     </section>
@@ -77,9 +79,14 @@
   <script>
     const REPORT_URL = "https://wifree-portal.neyocorp3.workers.dev/report";
     const $ = (id) => document.getElementById(id);
+    let lastReport = null;
 
     function number(value) {
       return Number(value || 0).toLocaleString("es-MX");
+    }
+
+    function percent(value, total) {
+      return total ? `${((Number(value || 0) / Number(total)) * 100).toFixed(1)}%` : "0.0%";
     }
 
     function table(target, columns, rows) {
@@ -119,11 +126,14 @@
         ["Anuncios asignados", totals.ad_assigned],
         ["Imágenes cargadas", totals.image_loaded],
         ["Publicidades completadas", totals.ad_completed],
-        ["Autorizaciones exitosas", totals.authorization_success]
+        ["Autorizaciones exitosas", totals.authorization_success],
+        ["Tasa de carga", percent(totals.image_loaded, totals.ad_assigned)],
+        ["Tasa de finalización", percent(totals.ad_completed, totals.image_loaded)]
       ].forEach(([label, value]) => {
         const card = document.createElement("div");
         card.className = "card";
-        card.innerHTML = `<span>${label}</span><strong>${number(value)}</strong>`;
+        const displayed = typeof value === "string" && value.endsWith("%") ? value : number(value);
+        card.innerHTML = `<span>${label}</span><strong>${displayed}</strong>`;
         $("cards").appendChild(card);
       });
 
@@ -155,6 +165,33 @@
       ], data.daily || []);
     }
 
+    function csvCell(value) {
+      const text = value === null || value === undefined ? "" : String(value);
+      return `"${text.replaceAll('"', '""')}"`;
+    }
+
+    function exportCsv(data) {
+      const header = ["seccion", "campaignId", "advertiser", "level", "location", "siteId", "day", "loaded", "completed", "authorized", "authorizationErrors"];
+      const rows = [header];
+      (data.byCampaign || []).forEach((item) => rows.push([
+        "campaña", item.campaignId, item.advertiser, item.level, "", "", "", item.loaded, item.completed, item.authorized, item.authorizationErrors
+      ]));
+      (data.bySite || []).forEach((item) => rows.push([
+        "ubicación", "", "", "", item.location, item.siteId, "", item.loaded, item.completed, item.authorized, item.authorizationErrors
+      ]));
+      (data.daily || []).forEach((item) => rows.push([
+        "día", "", "", "", "", "", item.day, item.loaded, item.completed, item.authorized, item.authorizationErrors
+      ]));
+      const csv = "\\ufeff" + rows.map((row) => row.map(csvCell).join(",")).join("\\r\\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `wifree-reporte-${new Date().toISOString().slice(0, 10)}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
     $("load").addEventListener("click", async () => {
       const token = $("token").value.trim();
       const days = $("days").value;
@@ -173,7 +210,9 @@
         });
         const data = await response.json();
         if (!response.ok || !data.success) throw new Error(data.error || `HTTP ${response.status}`);
+        lastReport = data;
         render(data);
+        $("export").disabled = false;
         status.textContent = `Actualizado: ${new Date(data.generatedAt).toLocaleString("es-MX")}`;
       } catch (error) {
         status.textContent = `No se pudo consultar el reporte: ${error.message}`;
@@ -181,6 +220,10 @@
       } finally {
         $("load").disabled = false;
       }
+    });
+
+    $("export").addEventListener("click", () => {
+      if (lastReport) exportCsv(lastReport);
     });
   </script>
 </body>
