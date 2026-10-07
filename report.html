@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WiFree · Reportes</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, -apple-system, Segoe UI, sans-serif; }
+    body { margin: 0; background: #f4f6f8; color: #17202a; }
+    main { max-width: 1100px; margin: 0 auto; padding: 24px 16px 48px; }
+    h1 { margin: 0 0 6px; font-size: 1.7rem; }
+    .muted { color: #68737d; }
+    .panel { background: #fff; border: 1px solid #dfe5ea; border-radius: 12px; padding: 16px; margin-top: 16px; box-shadow: 0 2px 8px #17202a0d; }
+    .controls { display: grid; grid-template-columns: 1fr 180px auto; gap: 10px; align-items: end; }
+    label { display: grid; gap: 5px; font-size: .88rem; font-weight: 600; }
+    input, select, button { min-height: 40px; box-sizing: border-box; border: 1px solid #c7d0d8; border-radius: 8px; padding: 8px 10px; font: inherit; }
+    button { cursor: pointer; background: #b9152b; color: #fff; border-color: #b9152b; font-weight: 700; }
+    button:disabled { opacity: .6; cursor: wait; }
+    .status { margin-top: 10px; min-height: 1.3em; }
+    .error { color: #a51228; }
+    .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .card { background: #f8fafb; border-radius: 10px; padding: 14px; }
+    .card strong { display: block; font-size: 1.7rem; margin-top: 5px; }
+    .table-wrap { overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; min-width: 620px; }
+    th, td { border-bottom: 1px solid #e7ebef; padding: 9px 8px; text-align: left; font-size: .92rem; }
+    th { background: #f8fafb; font-weight: 700; }
+    .empty { color: #68737d; padding: 16px 0; }
+    @media (max-width: 760px) {
+      .controls, .cards { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>WiFree · Reportes de publicidad</h1>
+    <div class="muted">Consulta los eventos registrados en D1.</div>
+
+    <section class="panel">
+      <div class="controls">
+        <label>Token de reporte
+          <input id="token" type="password" autocomplete="off" placeholder="REPORT_TOKEN">
+        </label>
+        <label>Periodo
+          <select id="days">
+            <option value="1">Últimas 24 horas</option>
+            <option value="7">Últimos 7 días</option>
+            <option value="30" selected>Últimos 30 días</option>
+            <option value="90">Últimos 90 días</option>
+          </select>
+        </label>
+        <button id="load" type="button">Consultar</button>
+      </div>
+      <div id="status" class="status muted"></div>
+    </section>
+
+    <section class="panel">
+      <div id="cards" class="cards"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Por campaña</h2>
+      <div id="campaigns" class="table-wrap"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Por ubicación</h2>
+      <div id="sites" class="table-wrap"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Por día</h2>
+      <div id="daily" class="table-wrap"></div>
+    </section>
+  </main>
+
+  <script>
+    const REPORT_URL = "https://wifree-portal.neyocorp3.workers.dev/report";
+    const $ = (id) => document.getElementById(id);
+
+    function number(value) {
+      return Number(value || 0).toLocaleString("es-MX");
+    }
+
+    function table(target, columns, rows) {
+      const node = $(target);
+      if (!rows.length) {
+        node.innerHTML = '<div class="empty">No hay datos para este periodo.</div>';
+        return;
+      }
+      const table = document.createElement("table");
+      const head = document.createElement("tr");
+      columns.forEach((column) => {
+        const cell = document.createElement("th");
+        cell.textContent = column.label;
+        head.appendChild(cell);
+      });
+      const thead = document.createElement("thead");
+      thead.appendChild(head);
+      table.appendChild(thead);
+      const tbody = document.createElement("tbody");
+      rows.forEach((row) => {
+        const tr = document.createElement("tr");
+        columns.forEach((column) => {
+          const td = document.createElement("td");
+          td.textContent = column.format ? column.format(row[column.key]) : (row[column.key] ?? "");
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      node.replaceChildren(table);
+    }
+
+    function render(data) {
+      const totals = Object.fromEntries((data.totals || []).map((item) => [item.eventType, item.total]));
+      $("cards").innerHTML = "";
+      [
+        ["Anuncios asignados", totals.ad_assigned],
+        ["Imágenes cargadas", totals.image_loaded],
+        ["Publicidades completadas", totals.ad_completed],
+        ["Autorizaciones exitosas", totals.authorization_success]
+      ].forEach(([label, value]) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `<span>${label}</span><strong>${number(value)}</strong>`;
+        $("cards").appendChild(card);
+      });
+
+      table("campaigns", [
+        { key: "campaignId", label: "Campaña" },
+        { key: "advertiser", label: "Anunciante" },
+        { key: "level", label: "Nivel" },
+        { key: "loaded", label: "Cargadas", format: number },
+        { key: "completed", label: "Completadas", format: number },
+        { key: "authorized", label: "Autorizadas", format: number },
+        { key: "authorizationErrors", label: "Errores", format: number }
+      ], data.byCampaign || []);
+
+      table("sites", [
+        { key: "location", label: "Ubicación" },
+        { key: "siteId", label: "Site ID" },
+        { key: "loaded", label: "Cargadas", format: number },
+        { key: "completed", label: "Completadas", format: number },
+        { key: "authorized", label: "Autorizadas", format: number },
+        { key: "authorizationErrors", label: "Errores", format: number }
+      ], data.bySite || []);
+
+      table("daily", [
+        { key: "day", label: "Día" },
+        { key: "loaded", label: "Cargadas", format: number },
+        { key: "completed", label: "Completadas", format: number },
+        { key: "authorized", label: "Autorizadas", format: number },
+        { key: "authorizationErrors", label: "Errores", format: number }
+      ], data.daily || []);
+    }
+
+    $("load").addEventListener("click", async () => {
+      const token = $("token").value.trim();
+      const days = $("days").value;
+      const status = $("status");
+      if (!token) {
+        status.textContent = "Escribe el token de reporte.";
+        status.className = "status error";
+        return;
+      }
+      $("load").disabled = true;
+      status.className = "status muted";
+      status.textContent = "Consultando…";
+      try {
+        const response = await fetch(`${REPORT_URL}?days=${encodeURIComponent(days)}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || `HTTP ${response.status}`);
+        render(data);
+        status.textContent = `Actualizado: ${new Date(data.generatedAt).toLocaleString("es-MX")}`;
+      } catch (error) {
+        status.textContent = `No se pudo consultar el reporte: ${error.message}`;
+        status.className = "status error";
+      } finally {
+        $("load").disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
